@@ -9,7 +9,7 @@ This project is optimized for hackathon judges: it is intentionally simple, audi
 
 **Demo safety disclaimer:** Testnet only. Not audited. No real-world value. No redemption. No yield.
 
-## How It Works (in plain English)
+## How It Works
 
 ### 1) Compliance gating (holdings control)
 
