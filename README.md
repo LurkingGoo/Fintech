@@ -7,6 +7,8 @@ Cerberus is a hackathon MVP blueprint + demo platform for **XRPL Testnet** showi
 - **Compliance gating:** On-ledger **Credentials** + issuer **RequireAuth** trustline authorization so only “Verified” wallets can hold a gated **asset unit token**.
 - **Trustless settlement:** XRPL **DEX atomic execution** via `OfferCreate` for RLUSD ↔ asset unit token swaps (Delivery‑versus‑Payment style settlement).
 
+This is the core problem statement: **regulatory-style access control** (eligibility + transfer/holding restrictions) plus **trustless DvP-style settlement**, implemented with XRPL-native primitives instead of smart contracts or a private “verified” database flag.
+
 
 
 Important demo note (reliability): the UI labels the quote asset as **“RLUSD (Simulated with XRP)”**. The intent is to demonstrate the _exact same settlement primitive_ (`OfferCreate`) without depending on sourcing Testnet RLUSD during a live demo.
@@ -226,6 +228,7 @@ Why: wallets are stored per-tab (sessionStorage) so disconnecting one user does 
 - Trustlines and offers consume XRP reserve; underfunded accounts will fail.
 - DEX offers can partially fill depending on liquidity.
 - RLUSD currency encoding must be discovered live (`account_lines`); Cerberus avoids hardcoding it.
+- This demo does not store PII and does not perform real KYC (it demonstrates the on-ledger *shape* of eligibility + enforcement).
 
 ## Docs
 
