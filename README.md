@@ -38,6 +38,8 @@ Cerberus uses the XRPL DEX. Swaps are executed by a single `OfferCreate` transac
 - RequireAuth trustline authorization as the enforcement mechanism
 - Native DEX swaps (`OfferCreate`) for RLUSD ↔ asset unit token trading
 - Minimal admin UI route (`/admin`) to keep the demo smooth
+- RLUSD currency auto-discovery (no hardcoded hex guessing)
+- Admin “Seed Liquidity” action to place demo offers
 - Optional NFT “metadata card” (UI-only, not a source of truth)
 
 ## Technology Stack
@@ -63,12 +65,11 @@ Copy the template and fill in real values:
 
 Then edit `.env.local` and populate:
 
-- `XRPL_WS_URL`
-- `XRPL_ISSUER_SEED` (server-side only)
-- `ADMIN_TOKEN` (for accessing `/admin`)
-- `RLUSD_CURRENCY` (discover live; see below)
+- `ISSUER_SEED` (server-side only; required for `/admin` actions)
+- `XRPL_WS_URL` (optional; server-side XRPL WebSocket endpoint)
+- `NEXT_PUBLIC_XRPL_TESTNET_ENDPOINT` (optional; client-side XRPL WebSocket endpoint)
 
-**Never commit `.env.local`.** The repo ignores `.env*` by default and whitelists only `.env.example`.
+**Never commit `.env.local`.** The repo ignores `.env*` by default.
 
 ### 3) Run the app
 
@@ -85,22 +86,42 @@ Before you attempt the demo flow, run a small script that:
 2. Calls the `feature` RPC to confirm the **Credentials** amendment is enabled.
 3. Confirms issuer account is funded and has `RequireAuth` enabled.
 4. Discovers RLUSD currency encoding **from the ledger** (do not guess):
-   - Call `account_lines` for the RLUSD issuer `rQhWct2fv4Vc4KRjRgMrxa8xPN9Zx9iLKV` (or for your funded wallet after claiming RLUSD).
-   - Extract the live `currency` value for RLUSD and set `RLUSD_CURRENCY` in `.env.local`.
+   - Cerberus discovers the RLUSD currency code on-ledger and shows it in the UI once the trustline exists.
+   - For admin liquidity seeding, paste the live RLUSD currency code into `/admin` (the app will not guess it).
 5. For every submitted transaction, verify success by:
    - waiting for `validated: true` on the transaction result, then
    - confirming the expected state via queries like `account_lines` (trustlines/balances) and `account_offers` (DEX offers).
 
 This “definitive live check” prevents most demo failures (missing amendments, wrong currency encoding, insufficient reserves, or non-validated transactions).
 
+## Demo Walkthrough (UI)
+
+**Admin (`/admin`)**
+
+1. Ensure `ISSUER_SEED` is set in `.env.local`.
+2. Confirm Issuer Status (funded, `RequireAuth` enabled).
+3. Issue Credential to the user wallet.
+4. Authorize the user’s CERB trustline.
+5. Seed Liquidity (places a sell offer: `100 CERB` for `50 RLUSD`).
+
+**User (`/`)**
+
+1. Connect Wallet.
+2. Request Credential (demo shortcut).
+3. Accept Credential.
+4. Set CERB Trustline (then wait for admin authorization).
+5. Setup RLUSD trustline.
+6. Buy 10 CERB (DEX `OfferCreate` with IOC + slippage tolerance).
+
 ## Known Constraints (read this before judging)
 
 - XRPL Testnet can reset at any time.
 - Trustlines and offers consume XRP reserve; underfunded accounts will fail.
 - DEX offers can partially fill depending on liquidity.
-- RLUSD currency encoding must be discovered live (`account_lines`).
+- RLUSD currency encoding must be discovered live (`account_lines`); Cerberus avoids hardcoding it.
 
 ## Docs
 
 - [docs/spec.md](docs/spec.md) — internal technical blueprint and transaction map
+- [docs/SIMULATION.md](docs/SIMULATION.md) — two-party (issuer vs user) demo script
 - [.github/copilot-instructions.md](.github/copilot-instructions.md) — agent/dev guardrails

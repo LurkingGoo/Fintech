@@ -1,0 +1,10 @@
+{
+  "name": "cerberus-repo",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix cerberus run dev",
+    "build": "npm --prefix cerberus run build",
+    "start": "npm --prefix cerberus run start",
+    "lint": "npm --prefix cerberus run lint"
+  }
+}
