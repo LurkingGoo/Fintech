@@ -1,15 +1,34 @@
 # Cerberus
 
-Cerberus is a hackathon MVP blueprint and demo platform for XRPL Testnet that shows how to build a realistic RWA-like flow **without smart contracts** by using **native XRPL primitives**:
+XRPL Testnet demo replacing smart contracts, escrow, and off-ledger KYC flags with on-ledger Credentials + RequireAuth gating and DEX OfferCreate swaps - auditable, judge-ready RWA-like flow (no SCs).
+
+Cerberus is a hackathon MVP blueprint + demo platform for **XRPL Testnet** showing how to build a realistic “RWA-like” flow **without smart contracts** by composing **native XRPL primitives**.
 
 - **Compliance gating:** On-ledger **Credentials** + issuer **RequireAuth** trustline authorization so only “Verified” wallets can hold a gated **asset unit token**.
 - **Trustless settlement:** XRPL **DEX atomic execution** via `OfferCreate` for RLUSD ↔ asset unit token swaps (Delivery‑versus‑Payment style settlement).
 
 This project is optimized for hackathon judges: it is intentionally simple, auditable, and designed to highlight XRPL’s advantages for finance.
 
-**Demo safety disclaimer:** Testnet only. Not audited. No real-world value. No redemption. No yield.
 
-## How It Works
+Important demo note (reliability): the UI labels the quote asset as **“RLUSD (Simulated with XRP)”**. The intent is to demonstrate the _exact same settlement primitive_ (`OfferCreate`) without depending on sourcing Testnet RLUSD during a live demo.
+
+References:
+
+- Project blueprint/spec: [docs/spec.md](docs/spec.md)
+- Two-party demo runbook: [docs/SIMULATION.md](docs/SIMULATION.md)
+- Demo-readiness fixes narrative: [docs/DEBUGGING_LOG.md](docs/DEBUGGING_LOG.md)
+- App folder readme (run commands): [cerberus/README.md](cerberus/README.md)
+
+## What’s Unique (judge highlights)
+
+- **No smart contracts**: uses only ledger primitives (matches [docs/spec.md](docs/spec.md)).
+- **Eligibility is on-ledger**: “Verified” is derived from XRPL **Credentials**, not a database flag.
+- **Enforcement is issuer-side**: `RequireAuth` + trustline authorization prevents unverified wallets from holding the asset unit token.
+- **Settlement is trustless**: swaps settle via XRPL DEX (`OfferCreate`), not escrow or off-ledger matching.
+- **Demo-safe terminology**: uses “asset unit token” (not shares/investment language).
+- **Definitive live checks**: any tx submission is treated as real only after `validated: true` and follow-up state queries.
+
+## How It Works (conceptual)
 
 ### 1) Compliance gating (holdings control)
 
@@ -18,6 +37,8 @@ This project is optimized for hackathon judges: it is intentionally simple, audi
 3. Because the issuer has `RequireAuth` enabled, the issuer must explicitly authorize your trustline.
 4. Only then can your wallet hold the gated token.
 
+Why this matters: credentials express eligibility, and `RequireAuth` makes eligibility enforceable (not just a UI promise).
+
 ### 2) Trustless settlement (atomic swaps)
 
 Cerberus uses the XRPL DEX. Swaps are executed by a single `OfferCreate` transaction that crosses existing offers.
@@ -25,12 +46,41 @@ Cerberus uses the XRPL DEX. Swaps are executed by a single `OfferCreate` transac
 - The transaction is atomic (it either succeeds or fails on-ledger).
 - Fills can be partial depending on liquidity and price constraints.
 
-## Simplified Flow Diagram
+Why this matters: the settlement outcome is finalized on-ledger without relying on a centralized matcher.
 
-- Connect wallet → Preflight checks
-- Admin issues Credential → User accepts (if required)
-- User creates trustline → Admin authorizes trustline
-- User swaps RLUSD ↔ CERB via `OfferCreate`
+## Diagrams
+
+### End-to-end flow (gating → authorized holding → swap)
+
+```mermaid
+sequenceDiagram
+   participant U as User Wallet (Browser)
+   participant A as Admin/Issuer (Server)
+   participant X as XRPL Testnet
+
+   U->>A: Request Credential (demo shortcut)
+   A->>X: CredentialCreate (issuer signs)
+   X-->>U: Credential appears (pre-accept)
+   U->>X: CredentialAccept (user signs)
+
+   U->>X: TrustSet (create CERB trustline)
+   A->>X: TrustSet tfSetfAuth (authorize trustline)
+   X-->>U: account_lines.peer_authorized = true
+
+   A->>X: OfferCreate (seed maker liquidity)
+   U->>X: OfferCreate (taker buy CERB)
+   X-->>U: Balance changes (validated ledger)
+```
+
+### Runtime architecture
+
+```mermaid
+flowchart LR
+   Browser[Browser UI (/)] -->|xrpl.js WS| XRPL[(XRPL Testnet)]
+   Browser -->|HTTP| NextAPI[Next.js API Routes (/api/admin/*)]
+   NextAPI -->|xrpl.js WS (server-side)| XRPL
+   NextAPI -->|signs issuer tx| IssuerSeed[(ISSUER_SEED\nserver env)]
+```
 
 ## Key Features
 
@@ -38,9 +88,9 @@ Cerberus uses the XRPL DEX. Swaps are executed by a single `OfferCreate` transac
 - RequireAuth trustline authorization as the enforcement mechanism
 - Native DEX swaps (`OfferCreate`) for RLUSD ↔ asset unit token trading
 - Minimal admin UI route (`/admin`) to keep the demo smooth
-- RLUSD currency auto-discovery (no hardcoded hex guessing)
+- RLUSD issuer reference + currency discovery endpoint (no hardcoded hex guessing)
 - Admin “Seed Liquidity” action to place demo offers
-- Optional NFT “metadata card” (UI-only, not a source of truth)
+- Two-user simulation support: per-tab wallets + explicit “Create new user”
 
 ## Technology Stack
 
@@ -73,10 +123,25 @@ Then edit `.env.local` and populate:
 
 ### 3) Run the app
 
-- `npm run dev`
+- `npm --prefix cerberus run dev`
 - Open `http://localhost:3000`
 
-### 4) Definitive live check (best practice — do this before the demo)
+### 4) One-time issuer seed generation (admin only)
+
+Only the person/machine running the server needs to do this (users do not).
+
+1. Start the dev server.
+2. Generate/fund the issuer and enable `RequireAuth`:
+
+   - PowerShell (recommended on Windows):
+     `Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3000/api/admin/init | ConvertTo-Json -Depth 10`
+
+3. Copy the returned `seed` value into `.env.local` as `ISSUER_SEED=...`.
+4. Restart the dev server.
+
+Why: the issuer must sign Credential issuance + trustline authorization; we keep the seed server-side to avoid client leaks.
+
+## Definitive live check (best practice — do this before the demo)
 
 Testnet conditions change. Do not assume the ledger is in the state you expect.
 
@@ -85,9 +150,7 @@ Before you attempt the demo flow, run a small script that:
 1. Connects to XRPL Testnet (WebSocket).
 2. Calls the `feature` RPC to confirm the **Credentials** amendment is enabled.
 3. Confirms issuer account is funded and has `RequireAuth` enabled.
-4. Discovers RLUSD currency encoding **from the ledger** (do not guess):
-   - Cerberus discovers the RLUSD currency code on-ledger and shows it in the UI once the trustline exists.
-   - For admin liquidity seeding, paste the live RLUSD currency code into `/admin` (the app will not guess it).
+4. (If using real RLUSD) discover RLUSD currency encoding **from the ledger** (do not guess).
 5. For every submitted transaction, verify success by:
    - waiting for `validated: true` on the transaction result, then
    - confirming the expected state via queries like `account_lines` (trustlines/balances) and `account_offers` (DEX offers).
@@ -96,13 +159,15 @@ This “definitive live check” prevents most demo failures (missing amendments
 
 ## Demo Walkthrough (UI)
 
+For the full two-party script, see [docs/SIMULATION.md](docs/SIMULATION.md).
+
 **Admin (`/admin`)**
 
 1. Ensure `ISSUER_SEED` is set in `.env.local`.
 2. Confirm Issuer Status (funded, `RequireAuth` enabled).
 3. Issue Credential to the user wallet.
 4. Authorize the user’s CERB trustline.
-5. Seed Liquidity (places a sell offer: `100 CERB` for `50 RLUSD`).
+5. Seed Liquidity (places a maker offer: sell CERB for **XRP**; UI labels this as “RLUSD (Simulated with XRP)”).
 
 **User (`/`)**
 
@@ -110,8 +175,17 @@ This “definitive live check” prevents most demo failures (missing amendments
 2. Request Credential (demo shortcut).
 3. Accept Credential.
 4. Set CERB Trustline (then wait for admin authorization).
-5. Setup RLUSD trustline.
-6. Buy 10 CERB (DEX `OfferCreate` with IOC + slippage tolerance).
+5. Buy 10 CERB (DEX `OfferCreate` that crosses the seeded offer).
+
+### Two-user demo (User #1 + User #2)
+
+You can run two users in parallel using two tabs/windows:
+
+1. Tab A: connect → choose **Create new user** → complete credential + trustline + authorization.
+2. Tab B: connect → choose **Create new user** → complete credential + trustline + authorization.
+3. `/admin` shows “Demo Users” (User 1 / User 2) and provides quick-pick chips for those addresses.
+
+Why: wallets are stored per-tab (sessionStorage) so disconnecting one user does not log out the other.
 
 ## Known Constraints (read this before judging)
 
@@ -124,4 +198,5 @@ This “definitive live check” prevents most demo failures (missing amendments
 
 - [docs/spec.md](docs/spec.md) — internal technical blueprint and transaction map
 - [docs/SIMULATION.md](docs/SIMULATION.md) — two-party (issuer vs user) demo script
+- [docs/DEBUGGING_LOG.md](docs/DEBUGGING_LOG.md) — the presenter-friendly debugging narrative
 - [.github/copilot-instructions.md](.github/copilot-instructions.md) — agent/dev guardrails

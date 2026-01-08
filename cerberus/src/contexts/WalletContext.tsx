@@ -137,11 +137,10 @@ function rememberDemoUserAddress(address: string) {
 }
 
 function loadSeedFromStorage(): string | null {
-  // IMPORTANT: Prefer per-tab storage so multiple open tabs can represent
-  // different demo users without clobbering each other.
-  const sessionSeed = loadStringFromSessionStorage(SESSION_STORAGE_SEED_KEY);
-  if (sessionSeed) return sessionSeed;
-  return loadStringFromLocalStorage(LOCAL_STORAGE_SEED_KEY);
+  // IMPORTANT: Only sessionStorage controls the *active wallet for this tab*.
+  // localStorage is treated as an optional "saved wallet" that is restored only
+  // when the user explicitly chooses it (see WalletConnector).
+  return loadStringFromSessionStorage(SESSION_STORAGE_SEED_KEY);
 }
 
 function saveSeedToLocalStorage(seed: string) {
