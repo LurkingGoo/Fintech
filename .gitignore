@@ -44,3 +44,8 @@ Thumbs.db
 
 # Housekeeping
 .github/copilot-instructions.md
+
+# Internal docs / editor rules (do not commit)
+.cursorrules
+spec.md
+guardrails.md

@@ -14,14 +14,13 @@ Important demo note (reliability): the UI labels the quote asset as **“RLUSD (
 
 References:
 
-- Project blueprint/spec: [docs/spec.md](docs/spec.md)
 - Two-party demo runbook: [docs/SIMULATION.md](docs/SIMULATION.md)
 - Demo-readiness fixes narrative: [docs/DEBUGGING_LOG.md](docs/DEBUGGING_LOG.md)
 - App folder readme (run commands): [cerberus/README.md](cerberus/README.md)
 
 ## What’s Unique (judge highlights)
 
-- **No smart contracts**: uses only ledger primitives (matches [docs/spec.md](docs/spec.md)).
+- **No smart contracts**: uses only ledger primitives.
 - **Eligibility is on-ledger**: “Verified” is derived from XRPL **Credentials**, not a database flag.
 - **Enforcement is issuer-side**: `RequireAuth` + trustline authorization prevents unverified wallets from holding the asset unit token.
 - **Settlement is trustless**: swaps settle via XRPL DEX (`OfferCreate`), not escrow or off-ledger matching.
@@ -196,7 +195,5 @@ Why: wallets are stored per-tab (sessionStorage) so disconnecting one user does 
 
 ## Docs
 
-- [docs/spec.md](docs/spec.md) — internal technical blueprint and transaction map
 - [docs/SIMULATION.md](docs/SIMULATION.md) — two-party (issuer vs user) demo script
 - [docs/DEBUGGING_LOG.md](docs/DEBUGGING_LOG.md) — the presenter-friendly debugging narrative
-- [.github/copilot-instructions.md](.github/copilot-instructions.md) — agent/dev guardrails

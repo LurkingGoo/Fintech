@@ -6,7 +6,6 @@ Start here:
 
 - Root overview + diagrams + demo walkthrough: [../README.md](../README.md)
 - Two-party simulation script: [../docs/SIMULATION.md](../docs/SIMULATION.md)
-- Technical spec (XRPL primitives map): [../docs/spec.md](../docs/spec.md)
 
 ## Run (from repo root)
 
