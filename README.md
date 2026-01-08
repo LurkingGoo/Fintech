@@ -32,16 +32,32 @@ Cerberus is intentionally a **Testnet demo**, but the building blocks map cleanl
 
 **Where this pattern shows up**
 
+- **REIT-style flows / tokenized real estate access**: “asset units” model fractional exposure; eligibility gates (KYC/AML, suitability, jurisdiction) and transfer restrictions are core requirements.
 - **Tokenized funds / private markets**: only wallets that passed eligibility checks (accredited investor, jurisdiction rules, transfer restrictions) should be able to hold the asset.
 - **Trade finance / supply-chain credits**: counterparties must be authorized before they can receive/hold settlement assets or receivables.
 - **Institutional onboarding**: a “Verified” state is usually off-ledger (databases, PDFs, emails). Here it is expressed **on-ledger** as a Credential.
 - **Audit + dispute reduction**: third parties can independently verify *what* was authorized and *when* by reading the ledger.
+
+**Why “purchasing” becomes simpler**
+
+In many real asset workflows, buying is slow because eligibility checks, transfer restrictions, and settlement coordination happen across multiple systems. Cerberus compresses that into a clean sequence:
+
+- **Eligibility** is written on-ledger (Credential) instead of a private DB flag.
+- **Holdings control** is enforced by the issuer (`RequireAuth` + trustline authorization).
+- **Settlement** happens atomically on-ledger via a single DEX `OfferCreate` that crosses existing liquidity.
+
+That’s the same structure described in our internal spec: *credentialed eligibility → enforceable holding gate → atomic DvP-style settlement*.
 
 **Why these XRPL primitives are helpful**
 
 - **Credentials**: encode eligibility as an on-ledger object instead of a backend flag (reduces reliance on a single operator’s database).
 - **RequireAuth + trustline authorization**: turns “eligibility” into enforceable holdings control (prevents unauthorized wallets from holding the issued asset).
 - **DEX `OfferCreate` settlement**: demonstrates Delivery-versus-Payment style settlement without introducing an escrow smart contract or off-ledger matcher.
+
+**What we optimized for a live demo (and why it matters in production too)**
+
+- **Fewer moving parts**: the swap path uses the same `OfferCreate` primitive even when the UI labels the quote asset as “RLUSD (Simulated with XRP)”, avoiding brittle dependencies during demos.
+- **Operational correctness**: we treat transactions as real only after `validated: true` + state queries (mirrors how real systems avoid “optimistic” accounting).
 
 In short: this demo shows an architecture that’s closer to how real teams ship (compliance gating + enforceable transfer restrictions + atomic settlement), but expressed with XRPL-native primitives.
 
