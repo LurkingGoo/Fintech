@@ -1,6 +1,6 @@
 # Cerberus
 
-XRPL Testnet demo replacing smart contracts, escrow, and off-ledger KYC flags with on-ledger Credentials + RequireAuth gating and DEX OfferCreate swaps - auditable, judge-ready RWA-like flow (no SCs).
+XRPL Testnet demo replacing smart contracts, escrow, and off-ledger KYC flags with on-ledger Credentials + RequireAuth gating and DEX OfferCreate swaps - auditable RWA-like flow (no SCs).
 
 Cerberus is a hackathon MVP blueprint + demo platform for **XRPL Testnet** showing how to build a realistic “RWA-like” flow **without smart contracts** by composing **native XRPL primitives**.
 
@@ -8,8 +8,6 @@ Cerberus is a hackathon MVP blueprint + demo platform for **XRPL Testnet** showi
 - **Trustless settlement:** XRPL **DEX atomic execution** via `OfferCreate` for RLUSD ↔ asset unit token swaps (Delivery‑versus‑Payment style settlement).
 
 This is the core problem statement: **regulatory-style access control** (eligibility + transfer/holding restrictions) plus **trustless DvP-style settlement**, implemented with XRPL-native primitives instead of smart contracts or a private “verified” database flag.
-
-
 
 Important demo note (reliability): the UI labels the quote asset as **“RLUSD (Simulated with XRP)”**. The intent is to demonstrate the _exact same settlement primitive_ (`OfferCreate`) without depending on sourcing Testnet RLUSD during a live demo.
 
@@ -19,7 +17,7 @@ References:
 - Demo-readiness fixes narrative: [docs/DEBUGGING_LOG.md](docs/DEBUGGING_LOG.md)
 - App folder readme (run commands): [cerberus/README.md](cerberus/README.md)
 
-## What’s Unique (judge highlights)
+## What’s Unique
 
 - **No smart contracts**: uses only ledger primitives.
 - **Eligibility is on-ledger**: “Verified” is derived from XRPL **Credentials**, not a database flag.
@@ -38,7 +36,7 @@ Cerberus is intentionally a **Testnet demo**, but the building blocks map cleanl
 - **Tokenized funds / private markets**: only wallets that passed eligibility checks (accredited investor, jurisdiction rules, transfer restrictions) should be able to hold the asset.
 - **Trade finance / supply-chain credits**: counterparties must be authorized before they can receive/hold settlement assets or receivables.
 - **Institutional onboarding**: a “Verified” state is usually off-ledger (databases, PDFs, emails). Here it is expressed **on-ledger** as a Credential.
-- **Audit + dispute reduction**: third parties can independently verify *what* was authorized and *when* by reading the ledger.
+- **Audit + dispute reduction**: third parties can independently verify _what_ was authorized and _when_ by reading the ledger.
 
 **Why “purchasing” becomes simpler**
 
@@ -48,7 +46,7 @@ In many real asset workflows, buying is slow because eligibility checks, transfe
 - **Holdings control** is enforced by the issuer (`RequireAuth` + trustline authorization).
 - **Settlement** happens atomically on-ledger via a single DEX `OfferCreate` that crosses existing liquidity.
 
-That’s the same structure described in our internal spec: *credentialed eligibility → enforceable holding gate → atomic DvP-style settlement*.
+That’s the same structure described in our internal spec: _credentialed eligibility → enforceable holding gate → atomic DvP-style settlement_.
 
 **Why these XRPL primitives are helpful**
 
@@ -222,13 +220,13 @@ You can run two users in parallel using two tabs/windows:
 
 Why: wallets are stored per-tab (sessionStorage) so disconnecting one user does not log out the other.
 
-## Known Constraints (read this before judging)
+## Known Constraints
 
 - XRPL Testnet can reset at any time.
 - Trustlines and offers consume XRP reserve; underfunded accounts will fail.
 - DEX offers can partially fill depending on liquidity.
 - RLUSD currency encoding must be discovered live (`account_lines`); Cerberus avoids hardcoding it.
-- This demo does not store PII and does not perform real KYC (it demonstrates the on-ledger *shape* of eligibility + enforcement).
+- This demo does not store PII and does not perform real KYC (it demonstrates the on-ledger _shape_ of eligibility + enforcement).
 
 ## Docs
 
