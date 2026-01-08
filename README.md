@@ -7,7 +7,6 @@ Cerberus is a hackathon MVP blueprint + demo platform for **XRPL Testnet** showi
 - **Compliance gating:** On-ledger **Credentials** + issuer **RequireAuth** trustline authorization so only “Verified” wallets can hold a gated **asset unit token**.
 - **Trustless settlement:** XRPL **DEX atomic execution** via `OfferCreate` for RLUSD ↔ asset unit token swaps (Delivery‑versus‑Payment style settlement).
 
-This project is optimized for hackathon judges: it is intentionally simple, auditable, and designed to highlight XRPL’s advantages for finance.
 
 
 Important demo note (reliability): the UI labels the quote asset as **“RLUSD (Simulated with XRP)”**. The intent is to demonstrate the _exact same settlement primitive_ (`OfferCreate`) without depending on sourcing Testnet RLUSD during a live demo.
@@ -26,6 +25,25 @@ References:
 - **Settlement is trustless**: swaps settle via XRPL DEX (`OfferCreate`), not escrow or off-ledger matching.
 - **Demo-safe terminology**: uses “asset unit token” (not shares/investment language).
 - **Definitive live checks**: any tx submission is treated as real only after `validated: true` and follow-up state queries.
+
+## Why This Matters (real-world mapping)
+
+Cerberus is intentionally a **Testnet demo**, but the building blocks map cleanly to real operational requirements in regulated finance and tokenized assets.
+
+**Where this pattern shows up**
+
+- **Tokenized funds / private markets**: only wallets that passed eligibility checks (accredited investor, jurisdiction rules, transfer restrictions) should be able to hold the asset.
+- **Trade finance / supply-chain credits**: counterparties must be authorized before they can receive/hold settlement assets or receivables.
+- **Institutional onboarding**: a “Verified” state is usually off-ledger (databases, PDFs, emails). Here it is expressed **on-ledger** as a Credential.
+- **Audit + dispute reduction**: third parties can independently verify *what* was authorized and *when* by reading the ledger.
+
+**Why these XRPL primitives are helpful**
+
+- **Credentials**: encode eligibility as an on-ledger object instead of a backend flag (reduces reliance on a single operator’s database).
+- **RequireAuth + trustline authorization**: turns “eligibility” into enforceable holdings control (prevents unauthorized wallets from holding the issued asset).
+- **DEX `OfferCreate` settlement**: demonstrates Delivery-versus-Payment style settlement without introducing an escrow smart contract or off-ledger matcher.
+
+In short: this demo shows an architecture that’s closer to how real teams ship (compliance gating + enforceable transfer restrictions + atomic settlement), but expressed with XRPL-native primitives.
 
 ## How It Works (conceptual)
 
