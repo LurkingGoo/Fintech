@@ -1,6 +1,6 @@
 # Cerberus
 
-XRPL Testnet demo replacing smart contracts, escrow, and off-ledger KYC flags with on-ledger Credentials + RequireAuth gating and DEX OfferCreate swaps - auditable RWA-like flow (no SCs).
+XRPL Testnet demo replacing smart contracts, escrow, and off-ledger KYC flags with on-ledger Credentials + RequireAuth gating and DEX OfferCreate swaps - auditable, judge-ready RWA-like flow (no SCs).
 
 Cerberus is a hackathon MVP blueprint + demo platform for **XRPL Testnet** showing how to build a realistic “RWA-like” flow **without smart contracts** by composing **native XRPL primitives**.
 
@@ -17,7 +17,7 @@ References:
 - Demo-readiness fixes narrative: [docs/DEBUGGING_LOG.md](docs/DEBUGGING_LOG.md)
 - App folder readme (run commands): [cerberus/README.md](cerberus/README.md)
 
-## What’s Unique
+## What’s Unique (judge highlights)
 
 - **No smart contracts**: uses only ledger primitives.
 - **Eligibility is on-ledger**: “Verified” is derived from XRPL **Credentials**, not a database flag.
@@ -220,7 +220,7 @@ You can run two users in parallel using two tabs/windows:
 
 Why: wallets are stored per-tab (sessionStorage) so disconnecting one user does not log out the other.
 
-## Known Constraints
+## Known Constraints (read this before judging)
 
 - XRPL Testnet can reset at any time.
 - Trustlines and offers consume XRP reserve; underfunded accounts will fail.
